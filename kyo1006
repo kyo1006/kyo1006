@@ -1,0 +1,459 @@
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>상가 임대차 갱신거절 차임연체액 산정기준</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --primary: #5D69F7;
+    --secondary: #FF7878;
+    --neutral-100: #FFFFFF;
+    --neutral-200: #F6F8FD;
+    --neutral-300: #EDF0F7;
+    --neutral-400: #CBD5E1;
+    --neutral-600: #64748B;
+    --neutral-800: #334155;
+    --neutral-900: #0F172A;
+    
+    --box-query: #5D69F7;
+    --box-renewal: #41C3BE;
+    --box-recontract: #FFC149;
+    --box-conclusion: #FF7878;
+    --box-important: #7F63F4;
+    
+    --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.05);
+    --shadow-md: 0 4px 6px rgba(15, 23, 42, 0.07);
+    --shadow-lg: 0 10px 15px rgba(15, 23, 42, 0.1);
+    
+    --spacing-xs: 4px;
+    --spacing-sm: 8px;
+    --spacing-md: 16px;
+    --spacing-lg: 24px;
+    --spacing-xl: 36px;
+    --spacing-2xl: 48px;
+    
+    --corner-sm: 6px;
+    --corner-md: 12px;
+    --corner-lg: 24px;
+    
+    --transition-fast: 0.15s ease;
+    --transition-normal: 0.3s ease;
+  }
+
+  *, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+  
+  body {
+    font-family: 'Noto Sans KR', sans-serif;
+    background-color: var(--neutral-200);
+    margin: 0;
+    padding: 0;
+    color: var(--neutral-800);
+    line-height: 1.7;
+    overflow-x: hidden;
+  }
+  
+  .loader-wrapper {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: var(--neutral-100);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    transition: opacity var(--transition-normal);
+  }
+  
+  .loader {
+    width: 60px;
+    height: 60px;
+    border: 5px solid var(--neutral-300);
+    border-radius: 50%;
+    border-top-color: var(--primary);
+    animation: spin 1s infinite ease-in-out;
+  }
+  
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  
+  .header {
+    background: var(--neutral-100);
+    padding: var(--spacing-xl) var(--spacing-lg);
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .header::before, .header::after {
+    content: "";
+    position: absolute;
+    width: 300px;
+    height: 300px;
+    border-radius: 50%;
+    z-index: 0;
+  }
+  
+  .header::before {
+    background: radial-gradient(rgba(93, 105, 247, 0.2), transparent 70%);
+    top: -100px;
+    left: -100px;
+  }
+  
+  .header::after {
+    background: radial-gradient(rgba(255, 120, 120, 0.15), transparent 70%);
+    bottom: -100px;
+    right: -100px;
+  }
+  
+  .container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: var(--spacing-xl);
+    position: relative;
+  }
+  
+  h1 {
+    font-size: 2.4rem;
+    font-weight: 700;
+    color: var(--neutral-900);
+    margin-bottom: var(--spacing-lg);
+    position: relative;
+    z-index: 1;
+  }
+  
+  .subtitle {
+    color: var(--neutral-600);
+    font-size: 1.1rem;
+    margin-bottom: var(--spacing-xl);
+    max-width: 650px;
+    margin-left: auto;
+    margin-right: auto;
+    position: relative;
+    z-index: 1;
+  }
+  
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: var(--spacing-lg);
+    margin-bottom: var(--spacing-2xl);
+  }
+  
+  .full-width {
+    grid-column: span 12;
+  }
+  
+  .half-width {
+    grid-column: span 12;
+  }
+  
+  .issue-box {
+    background: var(--neutral-100);
+    border-radius: var(--corner-md);
+    padding: var(--spacing-xl);
+    box-shadow: var(--shadow-md);
+    position: relative;
+    overflow: hidden;
+    transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+  }
+  
+  .issue-box:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-lg);
+  }
+  
+  .issue-box::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 6px;
+    height: 100%;
+  }
+  
+  .box-icon {
+    position: absolute;
+    top: var(--spacing-lg);
+    right: var(--spacing-lg);
+    font-size: 1.5rem;
+    opacity: 0.2;
+  }
+  
+  .box-query::before { background-color: var(--box-query); }
+  .box-renewal::before { background-color: var(--box-renewal); }
+  .box-recontract::before { background-color: var(--box-recontract); }
+  .box-conclusion::before { background-color: var(--box-conclusion); }
+  .box-important::before { background-color: var(--box-important); }
+  
+  .box-query .box-icon { color: var(--box-query); }
+  .box-renewal .box-icon { color: var(--box-renewal); }
+  .box-recontract .box-icon { color: var(--box-recontract); }
+  .box-conclusion .box-icon { color: var(--box-conclusion); }
+  .box-important .box-icon { color: var(--box-important); }
+  
+  h2 {
+    font-size: 1.6rem;
+    color: var(--neutral-900);
+    margin-bottom: var(--spacing-lg);
+    padding-bottom: var(--spacing-md);
+    border-bottom: 1px solid var(--neutral-300);
+    position: relative;
+  }
+  
+  h2::after {
+    content: "";
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    width: 60px;
+    height: 3px;
+  }
+  
+  .box-query h2::after { background-color: var(--box-query); }
+  .box-renewal h2::after { background-color: var(--box-renewal); }
+  .box-recontract h2::after { background-color: var(--box-recontract); }
+  .box-conclusion h2::after { background-color: var(--box-conclusion); }
+  .box-important h2::after { background-color: var(--box-important); }
+  
+  h3 {
+    font-size: 1.2rem;
+    color: var(--neutral-800);
+    margin: var(--spacing-lg) 0 var(--spacing-sm);
+  }
+  
+  p {
+    margin-bottom: var(--spacing-md);
+    color: var(--neutral-800);
+  }
+  
+  strong {
+    color: var(--primary);
+    font-weight: 600;
+  }
+  
+  ul {
+    list-style-type: none;
+    padding: 0;
+    margin: var(--spacing-md) 0;
+  }
+  
+  li {
+    position: relative;
+    padding-left: var(--spacing-xl);
+    margin-bottom: var(--spacing-md);
+  }
+  
+  li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 12px;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background-color: var(--primary);
+  }
+  
+  .legal-reference {
+    font-size: 0.85rem;
+    color: var(--neutral-600);
+    display: block;
+    margin-top: var(--spacing-md);
+    padding-top: var(--spacing-sm);
+    border-top: 1px dashed var(--neutral-300);
+    font-style: italic;
+  }
+  
+  .summary-card {
+    background: var(--neutral-100);
+    border-radius: var(--corner-md);
+    padding: var(--spacing-lg);
+    margin-top: var(--spacing-xl);
+    box-shadow: var(--shadow-sm);
+    border-left: 4px solid var(--secondary);
+  }
+  
+  .summary-title {
+    font-weight: 600;
+    color: var(--secondary);
+    margin-bottom: var(--spacing-sm);
+  }
+  
+  footer {
+    text-align: center;
+    padding: var(--spacing-xl) 0;
+    color: var(--neutral-600);
+    font-size: 0.9rem;
+    border-top: 1px solid var(--neutral-300);
+    margin-top: var(--spacing-2xl);
+  }
+  
+  /* Animation effect for scrolling */
+  .fade-in {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+  }
+  
+  /* Responsive styles */
+  @media (min-width: 768px) {
+    .half-width {
+      grid-column: span 6;
+    }
+  }
+  
+  @media (max-width: 767px) {
+    h1 {
+      font-size: 1.8rem;
+    }
+    
+    h2 {
+      font-size: 1.4rem;
+    }
+    
+    .container {
+      padding: var(--spacing-lg) var(--spacing-md);
+    }
+    
+    .issue-box {
+      padding: var(--spacing-lg);
+    }
+  }
+</style>
+</head>
+<body>
+
+<!-- Loading animation -->
+<div class="loader-wrapper">
+  <div class="loader"></div>
+</div>
+
+<!-- Header section -->
+<header class="header">
+  <div class="container">
+    <h1>상가 임대차 갱신거절 기준 안내</h1>
+    <p class="subtitle">상가건물 임대차보호법에 따른 3기 차임 연체액 산정기준을 명확히 이해하고 적용하기 위한 가이드라인입니다.</p>
+  </div>
+</header>
+
+<div class="container">
+  <div class="grid">
+    <div class="full-width fade-in">
+      <div class="issue-box box-query">
+        <i class="fas fa-question-circle box-icon"></i>
+        <h2>핵심 질문</h2>
+        <p>임차인이 갱신 또는 재계약 후 3기(개월) 차임을 연체했을 때, 갱신/재계약 이전의 연체액과 이후의 연체액을 <strong>합산하여 3기 연체 여부를 판단</strong>해야 하는가?</p>
+        <div class="summary-card">
+          <div class="summary-title">알아두세요</div>
+          <p>3기 연체는 상가건물 임대차보호법상 임대인이 계약 갱신을 거절할 수 있는 법적 근거가 됩니다.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="half-width fade-in">
+      <div class="issue-box box-renewal">
+        <i class="fas fa-sync-alt box-icon"></i>
+        <h2>'갱신'의 경우</h2>
+        <p>상가임대차법 제10조 ③에 따라, 갱신되는 임대차는 <strong>'전 임대차와 동일한 조건'</strong>으로 계약된 것으로 간주됩니다.</p>
+        
+        <h3>판례 입장</h3>
+        <p>갱신 전부터 연체하기 시작하여 갱신 후의 연체액과 합산하여 법정 기준(3기)에 달하면, 이는 갱신 거절 또는 해지 사유에 해당합니다.</p>
+        
+        <h3>결론</h3>
+        <p>동일 조건으로 <strong>단순 갱신된 경우</strong>에는 갱신 전후의 차임 연체액을 <strong>합산하여</strong> 3기 연체 여부를 판단하는 것이 타당합니다.</p>
+        <span class="legal-reference">대법원 2014. 7. 24. 선고 2012다28486 판결 참조</span>
+      </div>
+    </div>
+
+    <div class="half-width fade-in">
+      <div class="issue-box box-recontract">
+        <i class="fas fa-file-signature box-icon"></i>
+        <h2>'재계약'의 경우</h2>
+        <p>임대차 기간 만료 후, 기존 계약과 <strong>조건을 달리하여 새롭게 계약</strong>을 체결한 경우, 이는 원칙적으로 <strong>별개의 새로운 계약</strong>으로 보아야 합니다.</p>
+        
+        <h3>결론</h3>
+        <p>실질적인 <strong>'재계약'에 해당</strong>한다면, 3기 연체 여부는 <strong>새로운 계약 체결 시점부터 다시 기산</strong>하여 판단해야 합니다.</p>
+        <p>재계약 이전의 연체 사실은 새로운 계약에 대한 갱신 거절 사유 판단 기준에 포함되지 않을 가능성이 높습니다.</p>
+      </div>
+    </div>
+
+    <div class="full-width fade-in">
+      <div class="issue-box box-important">
+        <i class="fas fa-exclamation-triangle box-icon"></i>
+        <h2>중요 고려 사항</h2>
+        <p><strong>'재계약' 여부 판단:</strong> 계약서 내용, 보증금/차임/기간 등 조건 변경 여부, 체결 경위 등 구체적인 사실관계에 따라 법적 판단이 달라질 수 있습니다.</p>
+        <p>따라서 새로운 계약서의 내용을 <strong>면밀히 검토</strong>해야 합니다.</p>
+      </div>
+    </div>
+
+    <div class="full-width fade-in">
+      <div class="issue-box box-conclusion">
+        <i class="fas fa-gavel box-icon"></i>
+        <h2>최종 결론</h2>
+        <ul>
+          <li><strong>단순 '갱신':</strong> 갱신 전후의 차임 연체액을 <strong>합산</strong>하여 3기 연체 판단.</li>
+          <li><strong>'재계약':</strong> 재계약 이후의 연체액을 기준으로 3기 연체 판단 (이전 연체액 <strong>불포함</strong> 가능성 높음).</li>
+          <li><strong>주의:</strong> '재계약'의 구체적 내용과 조건에 따라 판단이 달라질 수 있으므로, 관련 계약서 검토가 필수입니다.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    본 가이드라인은 법률 조언이 아닌 실무 참고용으로 제작되었으며, 구체적인 사안에 대해서는 법률 전문가와 상담하시기 바랍니다.
+  </footer>
+
+</div>
+
+<script>
+  // Loading animation
+  window.addEventListener('load', function() {
+    setTimeout(function() {
+      document.querySelector('.loader-wrapper').style.opacity = '0';
+      setTimeout(function() {
+        document.querySelector('.loader-wrapper').style.display = 'none';
+      }, 500);
+    }, 800);
+  });
+
+  // Scroll animation
+  document.addEventListener('DOMContentLoaded', function() {
+    const fadeElements = document.querySelectorAll('.fade-in');
+    
+    function checkFade() {
+      fadeElements.forEach(element => {
+        const elementTop = element.getBoundingClientRect().top;
+        const windowHeight = window.innerHeight;
+        
+        if (elementTop < windowHeight - 100) {
+          element.style.opacity = '1';
+          element.style.transform = 'translateY(0)';
+        }
+      });
+    }
+    
+    // Initial check
+    setTimeout(checkFade, 300);
+    
+    // Check on scroll
+    window.addEventListener('scroll', checkFade);
+  });
+</script>
+
+</body>
+</html>
